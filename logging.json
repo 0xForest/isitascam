@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "utc": {"()": "app.UTCFormatter"}
+  },
+  "handlers": {
+    "console": {"class": "logging.StreamHandler", "formatter": "utc", "stream": "ext://sys.stderr"}
+  },
+  "loggers": {
+    "uvicorn": {"handlers": ["console"], "level": "INFO", "propagate": false}
+  }
+}

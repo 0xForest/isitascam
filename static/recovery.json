@@ -1,0 +1,66 @@
+[
+  {
+    "reply": "LINK",
+    "label": "I opened the link",
+    "paragraphs": [
+      "Close the page. If a file downloaded, leave it unopened. If you opened the file or installed something, update your device’s security software and run a scan."
+    ]
+  },
+  {
+    "reply": "CODE",
+    "label": "I shared a password or code",
+    "paragraphs": [
+      "For a password, open the official app or website and change it anywhere you used it. If there’s an option to sign out of all existing sessions, do that.",
+      "For a one-time code, contact the service that sent it. If it was a banking code, call your bank now."
+    ]
+  },
+  {
+    "reply": "BANK",
+    "label": "I shared card details or paid",
+    "paragraphs": [
+      "Call your bank now using the number in your banking app or on your card. If you shared card details, ask them to block the card. If you paid, report the payment and ask them to stop or reverse it."
+    ]
+  },
+  {
+    "reply": "COMMAND",
+    "label": "I ran a command from a message or website",
+    "aliases": ["CLICKFIX", "I ran the command", "I ran the commands"],
+    "paragraphs": [
+      "Disconnect that device from the internet now. Turn off Wi-Fi and unplug any network cable. Stop using it to sign in or make payments.",
+      "If it’s a work or school device, call your IT team from another device. Tell them when you ran the command and what the page asked you to do. For a personal device, use another device to contact trusted technical support for help checking and cleaning it before you reconnect.",
+      "From a different, trusted device, secure your email first, then other accounts you used or saved on the affected device. Change their passwords, sign out all other sessions and enable two-step verification. If you used banking services on that device, call your bank using the number on your card."
+    ]
+  },
+  {
+    "reply": "ACCESS",
+    "action": "install_or_grant_access",
+    "label": "I installed software or gave someone access to my device",
+    "paragraphs": [
+      "If you ran software or gave remote access, disconnect the device from the network. Use a different trusted device to contact IT or trusted support and secure accounts used on the affected device."
+    ]
+  },
+  {
+    "reply": "GIFT",
+    "action": "pay_by_gift_card",
+    "label": "I sent a gift-card code",
+    "paragraphs": [
+      "If you sent a gift-card code or a photo of the card, contact the card issuer immediately using the details on the card or its official site. Keep the card and receipt and ask if the balance can be frozen."
+    ]
+  },
+  {
+    "reply": "ID",
+    "action": "share_identity_details",
+    "label": "I shared personal details or an identity document",
+    "paragraphs": [
+      "If you shared identity details or a document, record exactly what you sent. Contact the document issuer or affected institution through its official site about misuse alerts and next steps."
+    ]
+  },
+  {
+    "reply": "CHAT",
+    "action": "contact_stranger",
+    "label": "I replied to the sender",
+    "paragraphs": [
+      "If you only replied, stop the conversation. Keep a copy, then block and report the contact in the messaging app."
+    ]
+  }
+]

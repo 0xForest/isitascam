@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Is it a scam?</title>
+  <link rel="icon" type="image/svg+xml" sizes="any" href="/static/favicon.svg">
+  <link rel="stylesheet" href="/static/site.css">
+  <script type="module" src="/static/check.js"></script>
+</head>
+<body>
+  <header class="masthead"><div class="shell mast-inner">
+    <a href="/" class="wordmark"><img src="/static/favicon.svg" width="32" height="32" alt="">Is it a scam?</a>
+    <a href="#how-it-works" id="guide-link">How this works <span aria-hidden="true">↘</span></a>
+  </div></header>
+  <main class="shell">
+    <div class="hero">
+      <div class="hero-copy"><h1>Message &amp; link<br><em>checker.</em></h1>
+        <p>Unsure about a text, email or WhatsApp message? Check the wording and links before you respond.</p>
+      </div>
+      <div class="radar-art" aria-hidden="true"><div class="radar">
+        <i class="sweep"></i><i class="blip first"></i><i class="blip second"></i><i class="blip third"></i>
+      </div></div>
+    </div>
+    <div class="workspace">
+      <form id="checker" class="card">
+        <label for="message" class="card-title">Message or link</label>
+        <p class="hint" id="message-hint">Paste the message as you received it, or just the link. Leave out passwords, security codes and personal details.</p>
+        <textarea id="message" rows="5" aria-describedby="message-hint" placeholder="Paste a suspicious message or URL here…" required></textarea>
+        <div class="form-actions">
+          <button type="submit" class="primary">Check now <span aria-hidden="true">↗</span></button>
+          <div class="examples"><span>Try an example</span> <button type="button" id="sample">Message</button>
+          {% if scanner_enabled or host_providers or url_providers %}<button type="button" id="sample-url">Link</button>{% endif %}</div>
+        </div>
+      </form>
+      <aside class="card progress" id="progress" data-screenshots="{{ 'on' if screenshots_enabled else 'off' }}" tabindex="-1" aria-labelledby="progress-title">
+        <h2 class="card-title" id="progress-title">Check progress</h2>
+        <ol class="stages">
+          <li id="quick-stage"><span class="stage-icon pulse-icon" aria-hidden="true"></span><div>
+            <h3>First impression</h3><strong id="quick-rating" aria-live="polite" hidden></strong><p id="quick-text">Checks the wording and links for early warning signs.</p>
+            <a id="certificate-credit" href="https://ctlogs.dev" hidden>Certificate data from ctlogs.dev</a>
+            <a id="google-advisory" href="https://developers.google.com/safe-browsing/v4/advisory" hidden>Advisory provided by Google</a>
+          </div></li>
+          <li id="ai-stage"><span class="stage-icon ai-icon" aria-hidden="true"></span><div>
+            <h3>AI review <span class="activity" aria-hidden="true"><i></i><i></i><i></i></span></h3>
+            <p id="ai-text" aria-live="polite">{% if ai_enabled %}Reviews the submitted wording or URL alongside the available evidence.{% else %}AI analysis is off on this server.{% endif %}</p>
+          </div></li>
+          <li id="brand-stage"><span class="stage-icon frame-icon" aria-hidden="true"></span><div>
+            <h3>Visual brand check <span class="activity" aria-hidden="true"><i></i><i></i><i></i></span></h3>
+            <p id="brand-text" aria-live="polite">{% if screenshots_enabled %}Looks for possible impersonation in an available page capture.{% else %}Screenshot collection is off on this server.{% endif %}</p>
+          </div></li>
+        </ol>
+        <p id="status" role="status">Waiting for a message or link</p>
+        <div class="progress-track"><progress id="check-progress" aria-labelledby="progress-title" max="5" value="0" hidden></progress></div>
+        <p id="elapsed" aria-hidden="true" hidden></p>
+        <button id="scan-another" type="button" hidden>Scan another</button>
+      </aside>
+    </div>
+    <section class="card assessment" id="result" hidden aria-labelledby="verdict">
+      <div class="result-heading"><span id="result-label">Assessment</span><h2 id="verdict"></h2></div>
+      <p id="assessment-summary" hidden></p>
+      <div class="next-step">
+        <h3 id="next-step-title">What to do now</h3>
+        <h4 id="before-acting">If you haven’t acted</h4><p id="next-step"></p>
+        <a id="paid-guidance" href="#recovery" hidden></a>
+      </div>
+      <div id="extracted-links" hidden><h3>Links found</h3><ul id="link-list"></ul></div>
+      <div id="request-details" hidden><h3>What the message asks</h3><dl id="detail-list"></dl></div>
+      <div id="ai-findings" hidden><h3>AI signals</h3><div id="ai-reviews"></div></div>
+      <p id="limitations"></p>
+      <p id="assessment-disclaimer" hidden></p>
+    </section>
+    <details class="card" id="recovery">
+      <summary><span aria-hidden="true">🛟</span> Already clicked or paid?</summary>
+      <h2>What happened?</h2>
+      {% for option in recovery_choices %}
+      <details id="recovery-{{ option.reply|lower }}">
+        <summary>{{ option.label }}</summary>
+        {% for paragraph in option.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+      </details>
+      {% endfor %}
+      <div id="recovery-options"></div>
+    </details>
+    <section id="visual-review" class="card" hidden aria-labelledby="visual-title">
+      <h2 id="visual-title" class="card-title">Screenshot review</h2>
+      <div class="capture-layout">
+        <figure id="scan-preview" hidden>
+          <img id="scan-image" alt="Screenshot of the page reviewed by the checker" hidden>
+          <figcaption id="scan-caption"></figcaption>
+        </figure>
+        <div class="visual-finding">
+          <h3>What the AI sees</h3>
+          <p id="visual-finding" aria-live="polite"></p>
+          <button id="retry-capture" type="button" hidden>Run this check again</button>
+        </div>
+      </div>
+    </section>
+    <details id="how-it-works">
+      <summary>How this works</summary>
+      <ol class="guide-steps">
+        <li><strong>Paste the message or link.</strong> Leave out passwords, security codes and personal details. Select <strong>Check now</strong>.</li>
+        <li><strong>See the first impression.</strong> The checker looks for warning signs in the wording, such as pressure to pay.{% if host_providers or url_providers %} If there are links, it checks the first one it can look up for reported threats.{% endif %}</li>
+        <li><strong>Wait for the review.</strong> {% if ai_enabled %}The AI looks at what you’re being asked to do and why it might put you at risk.{% if screenshots_enabled %} For a website, it reviews the captured page and screenshot together.{% endif %} {% endif %}Keep this page open. The result appears automatically when the check finishes.</li>
+        <li><strong>Decide what to do next.</strong> Read the result and follow the advice under <strong>What to do now</strong>. If you’ve already acted, open <strong>Already clicked or paid?</strong> and choose what happened.</li>
+      </ol>
+      <p>A new scam may have no warnings yet. If you’re unsure about a request, check it through an app or phone number you already trust.</p>
+      {% if ai_enabled or url_providers %}
+      <p>{% if ai_enabled %}AI checks share your submission with OpenRouter and its model provider. {% endif %}{% if url_providers %}URL reputation services receive the first eligible link. {{ submission_notice }}{% endif %}</p>
+      {% endif %}
+      <details>
+        <summary>Which services does the checker use?</summary>
+        <dl>
+          {% set sources = [
+            ("OpenRouter", "https://openrouter.ai/docs", "Sends your submission to the AI for review.", ai_enabled),
+            ("ctlogs.dev", "https://ctlogs.dev", "Provides certificate records. The domain registry confirms when a domain was registered.", "Site age" in host_providers),
+            ("Cloudflare security DNS", "https://developers.cloudflare.com/1.1.1.1/setup/#1111-for-families", "Checks whether the site is blocked for security reasons.", "Cloudflare DNS" in host_providers),
+            ("Cloudflare Radar", "https://radar.cloudflare.com/domains", "Describes the type of website behind a link.", "Cloudflare Radar" in host_providers),
+            ("Spamhaus DROP", "https://www.spamhaus.org/blocklists/do-not-route-or-peer/", "Checks whether the site uses a network associated with harmful activity.", "Spamhaus DROP" in host_providers),
+            ("URLhaus", "https://urlhaus.abuse.ch/", "Checks for reports of harmful downloads at the link.", "URLhaus" in url_providers),
+            ("Google Safe Browsing", "https://safebrowsing.google.com/", "Checks whether Google has warned about the link.", "Google Safe Browsing" in url_providers),
+            ("VirusTotal", "https://docs.virustotal.com/reference/url-info", "Shows whether security services have flagged the link.", "VirusTotal" in url_providers),
+            ("urlscan.io", "https://urlscan.io/docs/search/", "Looks up earlier checks of the link.", "urlscan.io" in url_providers),
+            ("Cloudflare URL Scanner", "https://developers.cloudflare.com/radar/investigate/url-scanner/", "Provides a snapshot of the linked page or the site’s homepage.", scanner_enabled)
+          ] %}
+          {% for name, url, description, enabled in sources %}
+          <dt><a href="{{ url }}">{{ name }}</a> <small>{% if enabled %}Enabled{% else %}Off{% endif %}</small></dt>
+          <dd>{{ description }}</dd>
+          {% endfor %}
+        </dl>
+      </details>
+    </details>
+    <details class="card" id="service-cost">
+      <summary>Is this service free?</summary>
+      <p>Yes. You can check a message here without an account or payment.</p>
+    </details>
+    <noscript>This checker needs JavaScript to submit a message and display results.</noscript>
+  </main>
+</body>
+</html>
