@@ -15,6 +15,38 @@ class AssessmentTests(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
         self.enterContext(patch.object(reputation, "SITE_AGE_ENABLED", False))
 
+    async def test_origin_behind_https_load_balancer(self):
+        import app
+        from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+
+        proxy = ProxyHeadersMiddleware(app.app, trusted_hosts="10.0.1.0/24")
+        headers = {"Host": "localhost:443", "Origin": "https://localhost",
+                   "X-Forwarded-Proto": "https", "Content-Type": "text/plain"}
+        for peer, origin, expected in (
+            ("10.0.1.8", "https://localhost", 200),
+            ("10.0.1.8", "https://another.example", 403),
+            ("10.0.2.8", "https://localhost", 403),
+        ):
+            transport = httpx.ASGITransport(app=proxy, client=(peer, 12345))
+            async with httpx.AsyncClient(transport=transport, base_url="http://localhost") as client:
+                with patch.object(openrouter, "API_KEY", ""):
+                    response = await client.post("/assess", content="hello", headers={**headers, "Origin": origin})
+                self.assertEqual(response.status_code, expected)
+
+    async def test_configured_public_origin_with_http_upstream(self):
+        import app
+
+        transport = httpx.ASGITransport(app=app.app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://localhost") as client:
+            with patch.object(app, "PUBLIC_ORIGIN", "https://checker.example"), patch.object(openrouter, "API_KEY", ""):
+                for origin, status in (("https://checker.example", 200), ("http://checker.example", 403),
+                                       ("https://checker.example.evil.test", 403), ("null", 403), (None, 403)):
+                    headers = {"Content-Type": "text/plain"}
+                    if origin:
+                        headers["Origin"] = origin
+                    response = await client.post("/assess", headers=headers, content="hello")
+                    self.assertEqual(response.status_code, status)
+
     def test_payment_report_changes_guidance_independently_of_verdict(self):
         from guidance import PAID_NEXT_STEP
         for verdict in ("Looks routine", "Unclear", "Suspicious", "Likely scam"):

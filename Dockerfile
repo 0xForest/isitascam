@@ -19,5 +19,5 @@ COPY --chmod=u=rwX,go=rX static ./static
 COPY --chmod=644 whatsapp/package.json whatsapp/bridge.js whatsapp/messages.js /app/whatsapp/
 USER 1000:1000
 ENV WHATSAPP_BRIDGE=1
-EXPOSE 8000
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log", "--limit-concurrency", "32", "--log-config", "logging.json"]
+EXPOSE 80
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "80", "--no-access-log", "--limit-concurrency", "32", "--log-config", "logging.json"]

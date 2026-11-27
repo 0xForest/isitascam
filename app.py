@@ -81,6 +81,7 @@ async def lifespan(_app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+PUBLIC_ORIGIN = os.getenv("PUBLIC_ORIGIN", "").strip().rstrip("/")
 hosts = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",")
 if COMBINED:
     hosts.append("127.0.0.1")  # The bridge calls the checker over container loopback.
@@ -400,8 +401,12 @@ async def assessment_updates(message, api_key, model, prompt, preview, *, web_vi
 @app.post("/assess")
 async def check_message(request: Request):
     origin = request.headers.get("origin", "")
-    expected_origin = f"{request.url.scheme}://{request.headers['host']}"
-    if origin != expected_origin:
+    scheme = request.url.scheme
+    host = request.headers["host"].lower()
+    # Browsers omit the default port when serializing an Origin.
+    host = host.removesuffix(":443" if scheme == "https" else ":80")
+    expected_origin = f"{scheme}://{host}"
+    if not origin or origin not in (expected_origin, PUBLIC_ORIGIN):
         raise HTTPException(403, "Submit the message from the checker page.")
     media_type = request.headers.get("content-type", "").split(";", 1)[0].strip().lower()
     if media_type != "text/plain":

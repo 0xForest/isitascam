@@ -20,11 +20,14 @@ for (const entry of (process.env.WHATSAPP_TESTERS || "").split(",")) {
   allowedNumbers.add(number);
 }
 
+let stage = "opening /session";
 async function run() {
   mkdirSync(sessionDir, { recursive: true });
+  stage = "opening /session/auth";
   const { state, saveCreds } = await useMultiFileAuthState(sessionDir + "/auth");
   let active;
   let backoff = 1000;
+  stage = "reading /session/receipts.json";
   const handle = await messageHandler({
     receiptFile: sessionDir + "/receipts.json",
     allowedNumbers,
@@ -39,7 +42,9 @@ async function run() {
   });
 
   while (true) {
+    stage = "clearing the previous pairing QR";
     rmSync(qrFile, { force: true });
+    stage = "connecting to WhatsApp";
     const socket = makeWASocket({
       auth: state,
       logger: pino({ level: "silent" }),
@@ -84,7 +89,9 @@ async function run() {
   }
 }
 
-run().catch(() => {
-  log("Bridge startup failed. Check session volume access and configuration.");
+run().catch(error => {
+  const code = typeof error?.code === "string" && /^[A-Z_0-9]{1,64}$/.test(error.code)
+    ? error.code : error instanceof SyntaxError ? "invalid syntax" : "unknown error";
+  log(`Bridge failed while ${stage} (${code}).`);
   process.exitCode = 1;
 });

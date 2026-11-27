@@ -31,7 +31,7 @@ AI checks send the submitted text, selected evidence and any screenshot to OpenR
 
 ## Deployment and WhatsApp
 
-Use one Uvicorn worker. Behind a reverse proxy, set `ALLOWED_HOSTS` and `FORWARDED_ALLOW_IPS`, disable response buffering and allow time for scans. Restart after changing the environment.
+Use one Uvicorn worker. Behind a reverse proxy, set `ALLOWED_HOSTS` and `FORWARDED_ALLOW_IPS`, disable response buffering and allow time for scans. On ECS with an HTTPS ALB listener and HTTP targets, put the public hostname in `ALLOWED_HOSTS` and the ALB subnet CIDRs in `FORWARDED_ALLOW_IPS` (comma-separated). This lets Uvicorn use the forwarded HTTPS scheme for the browser origin check. If an upstream proxy changes the host or scheme, set `PUBLIC_ORIGIN` to the exact external origin, including any non-default port. Limit inbound task traffic to the ALB security group and deploy the new task revision.
 
 Build the image using the README and create a private `.env`. To restrict WhatsApp access, set `WHATSAPP_TESTERS` to a comma-separated list. An empty list accepts direct messages from any number.
 
